@@ -1,0 +1,194 @@
+JAVA
+1. ToStringBuilder 工具类，用于输出对象，重写toString方法，避免用+  ,减少内存使用。
+例如：System.out.println(ToStringBuilder.reflectionToString(redisUtils.get("user", SysUserEntity.class)));
+
+2.websocket 中的主要server类注解@ServerEndpoint
+ 重写@OnOpen(连接触发) @OnMessage（收到客户端消息触发） @OnClose（关闭触发） @OnError（错误触发）
+ 
+3.IO复用,AIO,BIO,NIO,同步，异步，阻塞和非阻塞 区别(百度)
+https://www.cnblogs.com/aspirant/p/6877350.html?utm_source=itdadao&utm_medium=referral
+
+4.select、poll、epoll之间的区别(搜狗面试)
+https://www.cnblogs.com/aspirant/p/9166944.html
+
+Redis
+2. RedisTemplate  Redis的集成工具类。spring-data-redis 包中。
+导入spring-boot-starter-data-redis包中含有spring-data-redis 包。
+只需要去yml中配置属性即可。自动配置，需要时用@Autowired 注入。（Spring boot）
+RedisTemplate中包含：(redisTemplate.opsFor***) *** ---> value/hash/list/set/zset
+ a.valueOperations
+ b.hashOperations
+ c.listOperations
+ d.setOperations
+ e.zSetOperations
+
+
+3.redis + spring cache  可实现自动缓存
+	@EnableCaching：开启缓存功能
+	@Cacheable：定义缓存，用于触发缓存
+	@CachePut：定义更新缓存，触发缓存更新
+	@CacheEvict：定义清除缓存，触发缓存清除
+	@Caching：组合定义多种缓存功能
+	@CacheConfig：定义公共设置，位于class之上
+
+前端	
+4. Thymeleaf 中@{} 获取上下文 
+ 例如： <script th:src="@{../jquery.min.js}"></script>
+ th:  <html  xmlns:th="http://www.thymeleaf.org">   html上添加标签头
+ 
+阿里开源MySQL中间件Canal：
+快速入门：https://mp.weixin.qq.com/s?__biz=MzU1NTA0NTEwMg==&mid=2247484273&idx=1&sn=7fec41a40e763df094c0dd675330808a&chksm=fbdb1af0ccac93e676c2a0c6aeb1ff3edfe43b30969a7c1bbe19ccf7270acd6e41e6812caf0d&lang=zh_CN#rd
+
+
+Netty：基于 Java NIO 的异步事件驱动的网络应用框架
+实战入门：https://www.cnblogs.com/nanaheidebk/p/11025362.html
+
+nginx:高性能的HTTP和反向代理web服务器，同时也提供了IMAP/POP3/SMTP服务。
+https://www.nginx.cn/doc/index.html
+
+Tengine:由淘宝网发起的Web服务器项目，在nginx的基础上增加了新的功能。
+
+
+
+秒杀系统并发
+并发量1000，实际库存100
+1.普通处理：完成16个售出，建立1000个订单
+2.version乐观锁：完成35个售出，建立35个订单，但未全部售出，还有剩余库存
+3.令牌桶限流：通过使用Guava的RateLimiter实现令牌桶限流接口，实现控制请求数量
+    RateLimiter limiter = RateLimiter.create(10);
+4.通过悲观锁+spring的事务
+
+
+2020年6月2日
+
+mongodb:基于分布式文件存储的开源数据库系统。
+hive
+spark
+SDN
+
+MapReduce
+
+
+面试总结：
+1.mysql性能优化
+‌  设计数据库   考虑字段类型，范式与逆范式
+(1)范式与逆范式
+	第一范式：1NF是对属性的原子性约束，要求属性具有原子性，不可再分。
+	第二范式：2NF是对记录的唯一性约束，要求记录有唯一标志。
+	第三范式：3NF是对字段冗余性约束，要求字段没有冗余。（指一个表中不包含其在另一张表中已存在的非主关键字信息）
+	逆范式：逆范式化指的是通过增加冗余或重复的数据来提高数据库的读性能，逆范式可以减少关联查询，减少join的表数量。
+
+‌  功能方面    建立索引，进行分区：key取余，hash取余。index   partition
+partition by key(id) partitions 5
+(2)索引创建语句
+	create [unique:唯一索引] index index_name on tableName (列名,....)
+(3)数据库分区
+	Ⅰ.垂直分区
+		将写入操作比较频繁的数据库表进行分离到不同服务器中，如果两表关联，只能通过查出一张表，再查另一张，消耗性能。适合整体访问量中等，针对的是读写频繁的表的分离。
+	Ⅱ.水平分区
+		常规hash分区 取余：
+			CREATE TABLE tbhash (
+				id INT NOT NULL,
+				store_id INT
+			)
+			PARTITION BY HASH(store_id)
+			PARTITIONS 4;
+		hash通过时间参数分区
+			create table tbhash (
+				id int not null,
+				addTime DATE NOT NULL DEFAULT '1970-01-01'
+			)
+			PARTITION BY HASH(YEAR(addTime))
+			PARTITIONS 4;
+		key分区 : 通过hash算法key分区，不均匀
+			create table tbhash (
+				id int not null,
+				addTime DATE NOT NULL DEFAULT '1970-01-01'
+			)
+			PARTITION BY key(id)
+			PARTITIONS 4;
+
+‌  架构   利用缓存redis。主从复制：主写从读。，读写分离，负载均衡
+(4)主从复制：
+	Ⅰ. 建立多个和主数据库完全一样的数据库环境，称为从数据库，主数据库一般是准实时的业务数据库。
+	Ⅱ. 基本原理：Mysql支持单向、异步复制。mysql复制是基于主服务器在二进制日志中跟踪所有对数据库的更改，所以必须在主服务器启用二进制日志。
+	当一台从服务器连接到主服务器时，从服务器会通知主服务器在日志中读取最后一次成功更新的位置。从服务器接受从那时之后的所有更改，并在本机上执行相同的更新。
+	Ⅲ. 好处
+		a.实现服务器负载均衡
+		b.通过复制实现数据的异地备份
+		c.提高数据库系统的可用性
+(5) 利用redis + mysql
+
+sql优化  对于并发性的sql少用多表操作而将其拆分多次执行。分页limit使用时，应先通过条件过滤将检索的数据尽可能的精确到需要的数据上。利用慢查询日志功能去定位到执行慢的sql
+2.ssm原理
+‌  aop:面向切面编程，主要用来在不改变原来代码的基础上，增强或添加新的代码功能。可以在之前过之后执行。
+‌aop的使用，通过Aspect声明切面类，before,afterReturning声明执行前后，pointcut声明切点。切点函数，annotation声明某个注解的方法，execution
+‌aop用途:日志打印，事务，操作权限判定。
+‌aop实现方式，动态代理。
+‌IOC:控制反转，将类的创建权限交由系统管理，而不是又开发人员来自己管理。
+‌IOC的实现方式，工厂模式。
+‌DI：依赖注入，通过set,构造器，注解方式。
+‌spring七大模式：aop,orm,dao,web,webmvc,context,core
+‌spring事务隔离：特性：原子性，一致性，隔离性，持久性。
+‌spring事务隔离级别：默认，未提交读，已提交读，可重复读，串行化。mysql可重复读，oracle读已提交。
+‌mybatis分页：逻辑分页，sql,拦截器分页。
+‌mybaits缓存，一级缓存二级缓存。
+3.springboot
+  
+3.设计模式
+4.jq
+5.gc
+6.多线程，线程池
+7.redis
+
+
+
+
+
+
+
+springCloud:
+
+使用eureka 管理服务
+
+1.负载均衡的两种调度方式
+(1) ribbon+restTemplate : 
+	使用LoadBalanced表明这个restRemplate开启负载均衡的功能.  restTemplate.getForObject("http://eureka-provider?name=" + name,String.class);
+(2)	fegin : 
+	@FeignClient(value = "eureka-provider")
+	public interface HelloService {
+		@RequestMapping(value = "/",method = RequestMethod.GET)
+		String hi (@RequestParam(value = "name") String name);}
+2.Hystrix  断路器 ： Hystrix 具备拥有回退机制和断路器功能的线程和信号隔离，请求缓存和请求打包（request collapsing，即自动批处理，译者注），以及监控和配置等功能。
+(1) ribbon 中使用 ：
+	在需要保护的服务上添加@HystrixCommand(fallbackMethod = "hiFallBack") //这个名字是方法名，需要在下面定义
+(2) fegin 中使用 : 
+	必须要在配置文件中开启服务：feign.hystrix.enabled=true，
+	接口注解@FeignClient 必须要添加自定义的hystrix的fallback实现：@FeignClient(value = "springcloud-eureka-serviceprovider", fallback = HelloServiceHystrix.class)
+	HelloServiceHystrix 实现该service 类，并重写该方法。
+3.Config 分布式配置中心
+(1) 配置服务中心服务端
+	配置文件中添加 配置文件所在git的地址spring.cloud.config.server.git.uri，以及文件夹目录..git.searchPaths 默认是master分支 ..git.default-label，如果是公共仓库可以不用填写username,password
+	配置文件需要满足： client的application.name + '-' + [proflie:如 dev , prod] 支持yml 和 properties
+(2) 客户端
+	需要添加一个bootstrap.yml文件 （bootstrap.yml的优先度高于application,所以使用项目会先加载bootstrap文件） ： 添加配置项 spring.cloud.config.profile , ..config.uri : 服务地址
+(3) 手动刷新配置 ： actuator
+	# actuator监控相关的配置
+		management:
+		  endpoints:
+			web:
+			  exposure:
+				include: refresh,health,info
+		  endpoint:
+			health:
+			  show-details: always
+		  server: # 指定actuator端口。如果不指定则与系统服务端口一致。建议修改
+			port: 10001
+	#当修改了配置文件后，发送post请求http://127.0.0.1:10001/actuator/refresh 手动刷新配置
+	
+	问题1：目前发送POST后返回值没问题，但是还是没有更新配置No active profile set, falling back to default profiles: default？
+(4) 集成eureka实现高可用集群 ： 将config配置中心作为多个服务注册到eureka中
+	这里需要注意：客户端配置文件中，config.uri 改为discovery.enabled: true  discovery.service-id: config_server 直接填写config配置服务端的服务名称而不用端口
+
+
+

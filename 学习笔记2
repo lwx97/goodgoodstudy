@@ -85,7 +85,7 @@ hive
 spark
 SDN
 
-MapReduce 【map rei diu si】
+MapReduce
 
 
 面试总结：
@@ -172,62 +172,8 @@ partition by key(id) partitions 5
 3.设计模式
 4.jq
 5.gc
-	java8编程思想： https://github.com/LingCoder/OnJava8/blob/master/docs/book/06-Housekeeping.md
-	回收机制：
-		Ⅰ.引用计数(非JAVA)
-		Ⅱ.Java 虚拟机采用了一种自适应的垃圾回收技术
-			描述：
-				java虚拟机中，每次创建一个对象后，堆指针会指向还没有被分配的区域。垃圾回收器工作时，一边回收对象，一边将存活的对象进行紧凑排列。
-					对于java回收机制来说，他们依据：对于任意存活的对象，一定能追溯到其存活在栈或静态存储区中的引用。这个引用链条可能穿越多个对象层次，
-					由此，如果从栈或静态存储区遍历引用，会发现所有存活的对象。在这种方式下，java虚拟机采用了一种自适应的回收技术，其中一种做法叫做停止复制，
-					在进行工作时，会先停止程序，然后将所有存活对象复制到新的堆中，没有被复制的则被清理回收。但这中模式有两个缺点，一是需要存在两个堆，得维护比
-					实际需要多一倍的空间。其解决方式是，在所需堆中分配几个大的内存块，复制只发生在大的内存块中。二是，复制本身，一旦程序进入稳定运行状态，只会产生
-					很少的垃圾，甚至没有垃圾产生，但复制回收器仍然会进行复制，降低效率。所以为了避免这种结果，当没有新的垃圾产生时，回收器将转化为“标记清扫模式”，
-					其思路也类似，也是通过从栈和静态存储区出发去寻找存活的对象，此时，在寻找到存活的对象时先进行标记，然后当标记任务结束时，清扫没有被标记的对象，
-					但这种模式会造成堆空间的不连续性，降低分配新建对象分配内存的效率，所以，虚拟机最终采用自适应技术，当垃圾少时采用标记清扫模式，当堆空间中出现
-					很多的碎片时，采用停止复制模式。
-			a.停止-复制 ：程序停止，然后开始扫描所有的对象，寻找存活的对象，复制到新的堆中，依次排列
-			b.标记-清扫 ：也需要停止程序，然后扫描所有存活的对象，先标记，然后等待标记任务结束，将未标记的对象进行清理
-			c.新生代（Eden【e den】:Survivor（from）【se wai wei】:Survivor (to)= 8:1:）1: 停止-复制
-				Eden主要是新创建的对象分配内存的地方，当每发生一次回收时，from中还存活的对象复制到to区，并且年龄+1，此时from区变为to区，to区变为from区，
-					当年龄数达到一定值（默认15）时，将转移到老年代
-			d.老年代 ：默认15岁，使用：标记-清扫
-				当老年代区内存满了时，发生回收，使用标记-清扫模式
-			c.永生代（java8后取消了，变成元数据区，从虚拟机中改变到存在本地内存中）：主要存放.class和元数据
-	内加载器：
-		采用即时编译器（JIT）技术，当需要装载某个类（通常是创建该类的第一个对象）时,编译器会先找到其 .class 文件，然后将该类的字节码装入内存
-
-6.多线程，线程池 ReentrantLock【rei an chuan te la ke】 synchronized  Lock锁  volatile【wa lou tou】：共享变量(变量修饰符) ThreadLocal.class：线程变量，只属于当前线程, .get .set .remove
-	Ⅰ.多线程面试题总结   https://www.cnblogs.com/toria/p/11234323.html  
-	Ⅱ.常见线程池
-		a.FixedThreadPool【fai ke si te chuai pou】: 可重用固定线程数的线程池 ,使用 LinkedBlockingQueue 作为工作队列
-		b.SingleThreadExecutor【single chuai de e ke rai ke ter】: 只创建一个线程执行任务,使用 LinkedBlockingQueue 作为工作队列
-		c.CachedThreadPool 【kai si te chuai de pou】: 会根据使用情况创建线程，使用没有容量的SynchronousQueue作为线程池的工作队列，但CachedThreadPool的maximumPool是无界的。
-		d.ScheduledThreadPool 【si ke de chuai pou】: 继承自ThreadPoolExecutor。它主要用来在给定的延迟之后运行任务，或者定期执行任务。使用DelayQueue作为任务队列
-	Ⅲ.线程池中的工作队列
-		a.ArrayBlockingQueue：是一个基于数组结构的有界阻塞队列，此队列按FIFO（先进先出）原则对元素进行排序。
-		b.LinkedBlockingQueue：是一个基于链表结构的阻塞队列，此队列按FIFO排序元素，吞吐量通常要高于ArrayBlockingQueue。静态工厂方法Executors.newFixedThreadPool()使用了这个队列。
-		c.SynchronousQueue：是一个不存储元素的阻塞队列。每个插入操作必须等到另一个线程调用移除操作，否则插入操作一直处于阻塞状态，吞吐量通常要高于Linked-BlockingQueue，静态工厂方法Executors.newCachedThreadPool使用了这个队列。
-		d.PriorityBlockingQueue：一个具有优先级的无限阻塞队列。
-	Ⅳ.线程的生命周期：初始->可运行[Thread.start()]（就绪[yield()]/运行中）->等待（等待[Object.wait(),Object.join(),Object.notify(),.notifyAll()	]/超时等待[Thread.sleep(long)]）或进入阻塞(synchronized，Lock.lock())->结束
-		a.线程创建之后它将处于 初始状态(NEW)，调用 start() 方法后开始运行，线程这时候处于 可运行状态(READY)。
-		b.可运行状态的线程获得了 CPU 时间片后就处于 运行状态(RUNNING)。
-		c.当线程执行 wait()方法之后，线程进入 等待状态(WAITING)，进入等待状态的线程需要依靠其他线程的通知才能够返回到运行状态【notify()】。 而 超时等待状态(TIME_WAITING)相当于在等待状态的基础上增加了超时限制，【sleep（long millis）/wait（long millis）】，当超时时间到达后 Java 线程将会返回到运行状态。
-		d.当线程调用同步方法时，在没有获取到锁的情况下，线程将会进入到阻塞状态(BLOCKED)。
-		e.线程在执行 Runnable 的run()方法之后将会进入到 终止状态(TERMINATED)。
-	Ⅴ. 如何控制某个方法允许并发访问线程的大小？ Semaphore【sa mo fou er】
-		使用new Semaphore(5)  中的semaphore.acquire()请求 ，semaphore.release()释放
+6.多线程，线程池
 7.redis
-8.排序算法
-	Ⅰ.冒泡排序: 时间复杂度O(nlogn) ~ O(n^2)
-	Ⅱ.选择排序(不稳定): 时间复杂度O(nlogn) ~ O(n^2)
-	Ⅲ.插入排序: 时间复杂度O(nlogn) ~ O(n^2)
-	Ⅳ.快速排序(不稳定): 时间复杂度O(nlogn) ~ O(n^2)
-	Ⅴ.并归排序：时间复杂度O(nlogn)
-9.定时任务
-	Ⅰ. spring中自带的@Scheduled注解
-	Ⅱ.第三方框架 Quartz 
-
 
 
 
